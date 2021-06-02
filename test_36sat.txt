@@ -1,0 +1,37 @@
+------ start reading ---------
+nbsat 48
+nbRegion 156
+------ end reading ---------
+------ start reading site ---------
+------ end reading site ---------
+sat : 0
+sat : 1
+sat : 3
+sat : 5
+sat : 7
+sat : 8
+sat : 9
+sat : 11
+sat : 13
+sat : 15
+sat : 16
+sat : 17
+sat : 19
+sat : 21
+sat : 23
+sat : 24
+sat : 25
+sat : 27
+sat : 29
+sat : 31
+sat : 32
+sat : 33
+sat : 35
+sat : 37
+sat : 39
+sat : 40
+sat : 41
+sat : 43
+sat : 45
+sat : 47
+start decomposition 

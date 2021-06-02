@@ -1,0 +1,56 @@
+------ start reading ---------
+nbsat 48
+nbRegion 156
+------ end reading ---------
+------ start reading site ---------
+------ end reading site ---------
+sat : 0
+sat : 1
+sat : 3
+sat : 4
+sat : 5
+sat : 7
+sat : 8
+sat : 9
+sat : 11
+sat : 12
+sat : 13
+sat : 15
+sat : 16
+sat : 17
+sat : 19
+sat : 20
+sat : 21
+sat : 23
+sat : 24
+sat : 25
+sat : 27
+sat : 28
+sat : 29
+sat : 31
+sat : 32
+sat : 33
+sat : 35
+sat : 36
+sat : 37
+sat : 39
+sat : 40
+non visible OSContact : sat 40 num contact 278 start 334600 end 334720
+ Dev 139
+Move to visible slot  : -----> num contact 278 start 334461 end 334581
+sat : 41
+sat : 43
+sat : 44
+non visible OSContact : sat 44 num contact 755 start 907100 end 907220
+ Dev 20
+Move to visible slot  : -----> num contact 755 start 907080 end 907200
+sat : 45
+non visible OSContact : sat 45 num contact 755 start 907125 end 907245
+ Dev 45
+Move to visible slot  : -----> num contact 755 start 907080 end 907200
+sat : 47
+non visible OSContact : sat 47 num contact 755 start 907175 end 907295
+ Dev 95
+Move to visible slot  : -----> num contact 755 start 907080 end 907200
+start decomposition 
+end decomposition 
