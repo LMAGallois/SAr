@@ -62,3 +62,6 @@ variables :
         //somme sur sat de x(u,sat,c) >= 2 - z(u,c) pour tout (u,c)
     fonction objectif :
         //min de somme sur u et sur c de z(u,c)
+
+3E MODELE
+[...]
