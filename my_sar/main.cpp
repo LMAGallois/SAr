@@ -17,13 +17,13 @@ using namespace std::literals::chrono_literals;
 using namespace std;
 
 
-void f_wrapper( vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux,vector<float> contacts, defined_data its_data, list<schedule> plan)
+void f_wrapper( vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux,vector<float> contacts, defined_data its_data, list<schedule> plan, int contact)
 {
     std::mutex m;
         std::condition_variable cv;
 
     std::thread t([&](){
-        solveMIP_time(userToSat, antennaToSat, creneaux, contacts, its_data, plan);
+        solveMIP_ssc(userToSat, antennaToSat, creneaux, contacts, its_data, contact);
         cv.notify_one();
 
     }) ;
@@ -32,7 +32,7 @@ void f_wrapper( vector< vector < vector <int> > > userToSat, vector< vector < ve
 
     {
         std::unique_lock<std::mutex> l(m);
-        if(cv.wait_for(l, 100s) == std::cv_status::timeout) 
+        if(cv.wait_for(l, 50s) == std::cv_status::timeout) 
             throw std::runtime_error("Timeout");
     }    
 }
@@ -84,6 +84,9 @@ int main(){
 
     parse_matrix_s(contacts, antennaToSat, its_data);
 
+            int a;
+        cin>> a;
+
     cout << "######################matrice userToSat" << endl << endl;
     //display_3Dmatrix(userToSat);
 
@@ -101,12 +104,16 @@ int main(){
     cout << "########################matrice antennaToSat" << endl << endl;
     //display_3Dmatrix(antennaToSat);
     
+    //pour solveMIP_ssc 
+    int contact=0;
+    
     t=clock();
-    //solveMIP_time(userToSat, antennaToSat, creneaux, contacts, its_data, plan);
+//    solveMIP_basic(userToSat, antennaToSat, creneaux, contacts, its_data, plan);
+f_wrapper(userToSat, antennaToSat, creneaux, contacts, its_data ,plan ,contact);
+
     t=clock()-t;
     cout << "temps d'execution du solveur " << t/CLOCKS_PER_SEC << endl;
 
-//f_wrapper(userToSat, antennaToSat, creneaux, contacts, its_data, plan);
 
     return ret;
 }

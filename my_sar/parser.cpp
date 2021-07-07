@@ -59,7 +59,7 @@ defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &
     cout << "number of antennas: " << endl;
     cin >> nbAntennas_in;*/
 
-int horizon_c_in;
+    int horizon_c_in;
     int nbUsers_in;
     int nbSites_in;
     int nbSatellites_in;
@@ -96,12 +96,12 @@ int horizon_c_in;
     file >> str_temp;
     file >> nbAntennas_in;
 
-        defined_data its_data;
-        its_data.horizon_c=horizon_c_in;
-        its_data.nbUsers= nbUsers_in;
-        its_data.nbSatellites=nbSatellites_in;
-        its_data.nbSites= nbSites_in;
-        its_data.nbAntennas= nbAntennas_in;
+    defined_data its_data;
+    its_data.horizon_c=horizon_c_in;
+    its_data.nbUsers= nbUsers_in;
+    its_data.nbSatellites=nbSatellites_in;
+    its_data.nbSites= nbSites_in;
+    its_data.nbAntennas= nbAntennas_in;
 
 
     vector <schedule> tab;
@@ -489,7 +489,7 @@ void parse_matrix_s(vector<float> contacts, vector< vector < vector <int> > > &a
     
     cout << "------ start reading site ---------" << endl;
     
-    for (int i=0; i<its_data.nbSites;i++)
+    for (i=0; i<its_data.nbSites;i++)
     {
             
         switch (i) {

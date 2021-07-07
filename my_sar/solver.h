@@ -17,5 +17,6 @@ void solveMIP(vector< vector < vector <int> > > userToSat, vector< vector < vect
 void get_plan(list<schedule> plan);
 void solveMIP_basic(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data, list<schedule> plan);
 void solveMIP_time(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data,list<schedule> plan);
+void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data,int contact);
 
 #endif
