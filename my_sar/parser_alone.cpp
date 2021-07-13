@@ -625,7 +625,7 @@ while(file2 >> temp){
     
     cout << "------ start reading site ---------" << endl;
     
-    for (int i=0; i<its_data.nbSites;i++)
+    for ( i=0; i<its_data.nbSites;i++)
     {
             
         switch (i) {

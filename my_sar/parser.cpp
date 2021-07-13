@@ -16,18 +16,6 @@ void display_array(vector<float> &matrice){
     }
 }
 
-void display_2Dmatrix(vector< vector <schedule> > &matrice){
-    for (int i=0; i < matrice.size(); i++){
-        cout << "satellite n° " << i << endl; 
-        
-        for (int k=0; k < matrice[i].size(); k++){
-            cout << matrice[i][k].s << "---";
-            cout << matrice[i][k].e << "  ";
-        }
-        cout << endl;
-    }
-}
-
 void display_3Dmatrix(vector< vector < vector<int> > > &matrice){
     for (int i=0; i < matrice.size(); i++){
         cout << " utilisateur/antenne n° " << i << endl;
@@ -44,7 +32,7 @@ void display_3Dmatrix(vector< vector < vector<int> > > &matrice){
     }
 }
 
-defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &creneaux)
+defined_data parse_contacts(list<float> &contacts)
 {
         /*
     cout << "please, specify your satellite constellation" << endl;
@@ -102,15 +90,6 @@ defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &
     its_data.nbSatellites=nbSatellites_in;
     its_data.nbSites= nbSites_in;
     its_data.nbAntennas= nbAntennas_in;
-
-
-    vector <schedule> tab;
-    
-    for (int i =0; i < its_data.nbSatellites; i++){
-        
-        creneaux.push_back(tab);
-
-    }
 
     list<float> contacts_temp;
     const char* cfile_u = "data/cov20.cvaa";
@@ -207,13 +186,7 @@ defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &
                 //cout << sat << endl;
                 //cout << s << endl;
                 //cout << e << endl;
-                sat=sat-1; //décalage dans le fichier d'origine
-                schedule slot=schedule{sat, s, e};
-                creneaux[sat].push_back(slot);
 
-                //cout << slot.sat << endl;
-                //cout << slot.s << endl;
-                //cout << slot.e << endl;
             }
             
             //cout << "contact : "<< e <<endl;
@@ -288,25 +261,13 @@ defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &
                 contacts_temp.push_back(float(s));
                 contacts_temp.push_back(float(e));
                 contacts_temp.sort();
-                
-                
-                schedule slot=schedule{sat, s, e};
-                creneaux[sat].push_back(slot);
-                //cout << slot.sat << endl;
-                //cout << slot.s << endl;
-                //cout << slot.e << endl;
             }
             
         }
         cout << "------ end reading ---------" << endl;
 
     }
-    // si un sat n'a pas de creneaux alors on initialise à -1
-    for(int i=0; i < creneaux.size(); i ++){
-        if(creneaux[i].empty() ){
-                creneaux[i].push_back(schedule{-1,-1,-1});
-        }
-    }
+
 
     //on enleve les doublons avant d ecrire dans le fichier
     int taille = contacts_temp.size();
@@ -332,10 +293,6 @@ defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &
         contacts_temp.pop_front();
     }
 
-    //cout << creneaux[sat].front().s << endl;
-    //cout << creneaux[sat].front().e << endl;
-    //cout << creneaux[sat].back().s << endl;
-    //cout << creneaux[sat].back().e << endl;
 its_data.nb_contacts=contacts.size();
     return its_data;
 
@@ -386,8 +343,6 @@ void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &u
     }
 
     file >> nbSat ;
-    nbSat--;
-    cout << "nbsat " << nbSat <<endl;
 
     found=-1;
     while(found==-1)
@@ -398,24 +353,25 @@ void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &u
         //cout << found << endl;
     }
 
-    ////////////////////////////////////////
-
     cout << "---------------" << endl;
 
     found=-1;
 
-    c=0;
+    c=0;   
 
     while(c < its_data.nbUsers)
     {
+
         found=-1;
         while(found==-1)
         {
             file >> str;
+
             //cout << "ligne1 " << str << endl;
             found=str.find("PointNumber");
             //cout << found << endl;
         }
+
 
         found=-1;
         while(found==-1)
@@ -426,15 +382,14 @@ void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &u
             //cout << found << endl;
         }
         file >> nbContact ;
-        //cout << "nbContact " << nbContact <<endl;
 
-        s=0;
-        while(s < its_data.horizon_c)
+        for(int j=0; j < nbContact; j++)
         {
-            //cout << "contact n° "<< i <<endl;
+            //cout << "contact n° "<< j <<endl;
             file>>sat;
             file>>s;
             file>>e;
+
             //cout << "contact : "<< e <<endl;
             
             sat=sat-1;
@@ -442,13 +397,16 @@ void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &u
 
                 for (int i=0; i < contacts.size()-1; i++ ){
                     //cout << "coucou" << endl;
-                    if(contacts[i] >= s && contacts[i] < e){
-                        //cout << "update matrix" << endl;
+                    if(contacts[i] >= s && contacts[i+1] <= e){
+                        //cout << "update matrix" <<s <<" "<< i <<" "<<contacts.back()<<endl;
                         userToSat[c][sat][i]=1;
                     }
+                
                 }
+                //cout << "coucou" << endl;
             }
-            
+                                //cout << "coucou" <<s << endl;
+
         }
 
 
@@ -537,8 +495,8 @@ void parse_matrix_s(vector<float> contacts, vector< vector < vector <int> > > &a
             //cout << "ligne " << d << endl;
 
             if(s < its_data.horizon_c && sat < its_data.nbSatellites){
-                for (int j=0; j < contacts.size(); j++ ){
-                    if(contacts[j] >= s && contacts[j] < e){
+                for (int j=0; j < contacts.size()-1; j++ ){
+                    if(contacts[j] >= s && contacts[j+1] <= e){
                         for(int k=0; k < its_data.nbAntennas; k++){
                             antennaToSat[i+k][sat][j]=1;
                             //cout << "update matrix" << endl;
@@ -552,7 +510,205 @@ void parse_matrix_s(vector<float> contacts, vector< vector < vector <int> > > &a
     }
 }
 
+defined_data parse_contacts_sites(list<float> &contacts)
+{
+        /*
+    cout << "please, specify your satellite constellation" << endl;
+    cout << "horizon (maximum time slot): " << endl;
+    cin >> horizon_c_in;
+    cout << "number of users: " << endl;
+    cin >> nbUsers_in;
+    cout << "number of stations: " << endl;
+    cin >> nbSites_in;
+    cout << "number of satellites: " << endl;
+    cin >> nbSatellites_in;
+    cout << "number of antennas: " << endl;
+    cin >> nbAntennas_in;*/
 
+    int horizon_c_in;
+    int nbUsers_in;
+    int nbSites_in;
+    int nbSatellites_in;
+    int nbAntennas_in;
+
+    const char* cfile_conf = "in_out/config.txt";
+    ifstream file(cfile_conf);
+    if ( !file ) {
+        cerr << "No such file: " << cfile_conf << endl;
+        throw(-1);
+    }
+    
+    string str_temp;
+
+    int found=-1;
+    while(found==-1)
+    {
+        file >> str_temp;
+        //cout << "ligne " << str << endl;
+        found=str_temp.find("horizon_c");
+        //cout << found << endl;
+    }
+    //cout << str_temp << endl;
+        file >> horizon_c_in;
+    file >> str_temp;
+        file >> nbUsers_in;
+    //cout << nbUsers_in << endl;
+
+    file >> str_temp;
+        file >> nbSites_in;
+
+    file >> str_temp;
+    file >> nbSatellites_in;
+    file >> str_temp;
+    file >> nbAntennas_in;
+
+    defined_data its_data;
+    its_data.horizon_c=horizon_c_in;
+    its_data.nbUsers= nbUsers_in;
+    its_data.nbSatellites=nbSatellites_in;
+    its_data.nbSites= nbSites_in;
+    its_data.nbAntennas= nbAntennas_in;
+
+    list<float> contacts_temp;
+    list<float> contacts_temp2;
+    const char* output_file = "in_out/contacts.txt";
+
+    string str;
+    int c;
+    int i;
+
+    int nbSat=-1;
+    int nbContact;
+
+    int sat;
+    float s;
+    float e=0;
+
+    
+
+
+/////////////////parse fenetres visibilités satellites et sites
+
+    float d;
+    
+    const char* cfile;
+    
+    cout << "------ start reading site ---------" << endl;
+    
+    for (int i=0; i<its_data.nbSites;i++)
+    {
+            
+        switch (i) {
+            case 0:
+                cfile = "data/visiSVA.txt";
+                break;
+            case 1:
+                cfile = "data/visiKOU.txt";
+                break;
+            case 2:
+                cfile = "data/visiTHT.txt";
+                break;
+            case 3:
+                cfile = "data/visiREU.txt";
+                break;
+            case 4:
+                cfile = "data/visiNOU.txt";
+                break;
+                
+                
+            default:
+                break;
+        }
+        
+        
+        ifstream file(cfile);
+        if ( !file ) {
+            cerr << "No such file: " << cfile << endl;
+            throw(-1);
+        }
+        
+        
+        file.ignore(256,'\n');
+        file.ignore(256,'\n');
+        file.ignore(256,'\n');
+        
+        while(file >> sat)
+        {
+            //cout << "ligne " << sat << endl;
+            file >> s;
+            //cout << "ligne " << s << endl;
+            file >> e;
+            //cout << "ligne " << e << endl;
+            file >> d;
+            //cout << "ligne " << d << endl;
+
+            if (s < its_data.horizon_c && sat < its_data.nbSatellites){
+                if(e > its_data.horizon_c){
+                    e = its_data.horizon_c;
+                }
+                contacts_temp.push_back(float(s));
+                contacts_temp.push_back(float(e));
+                contacts_temp.sort();
+                
+            }
+            
+        }
+        cout << "------ end reading ---------" << endl;
+
+    }
+
+    //on enleve les doublons avant d ecrire dans le fichier
+    int taille = contacts_temp.size();
+
+    for(int it=0; it < taille ; it++){
+        
+        float temp1=contacts_temp.front();
+        contacts_temp.pop_front();
+        float temp2=contacts_temp.front();
+        if(temp1!=temp2){
+            contacts_temp.push_back(temp1);
+        }
+    }
+    contacts_temp.sort();
+//on enleve les intervalles d emoins de 600s
+    taille=contacts_temp.size();
+    
+    for(int i=0; i < taille-1; i++){
+
+        float a=contacts_temp.front();
+
+        contacts_temp.pop_front();
+
+        float b=contacts_temp.front();
+
+        contacts_temp.pop_front();
+        if(i==0){
+            contacts_temp2.push_back(a);
+        }
+        if(b-a >= 600){
+            contacts_temp2.push_back(b);
+            contacts_temp.push_back(b);
+        }else{
+            contacts_temp.push_back(a);
+        }
+    }
+//cout <<"coucou"<<endl;
+
+//ecriture dans le fichier in_out/contacts
+    ofstream output(output_file);
+
+    taille=contacts_temp2.size();
+    for(int it=0; it < taille ; it++){
+        float temp= contacts_temp2.front();
+        output << temp << endl;
+        contacts.push_back(temp);
+        contacts_temp2.pop_front();
+    }
+    //output << taille<<endl;
+    its_data.nb_contacts=contacts.size();
+    return its_data;
+
+}
 
 
 

@@ -1,6 +1,6 @@
 please, specify your satellite constellation
 horizon_c 600
-nbUsers 1400
+nbUsers 100
 nbSites 5
-nbSatellites 48
+nbSatellites 24
 nbAntennas 4

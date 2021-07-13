@@ -83,8 +83,8 @@ parser_alone.o: parser_alone.cpp
 solver_alone.o: solver_alone.cpp
 	$(CCC) -c $(CCFLAGS) solver_alone.cpp -o solver_alone.o
 
-sched_Cband: main.o solver.o parser.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o sched_Cband main.o solver.o parser.o $(CCLNFLAGS)
+sched_Cband: main.o solver.o parser.o checker.o
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o sched_Cband main.o solver.o parser.o checker.o $(CCLNFLAGS)
 
 main.o:  main.cpp
 	$(CCC) -c $(CCFLAGS) main.cpp -o main.o
@@ -94,3 +94,6 @@ parser.o:  parser.cpp
 
 solver.o:  solver.cpp
 	$(CCC) -c $(CCFLAGS)  solver.cpp -o solver.o
+
+checker.o:  checker.cpp
+	$(CCC) -c $(CCFLAGS)  checker.cpp -o checker.o

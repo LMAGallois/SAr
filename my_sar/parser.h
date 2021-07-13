@@ -23,20 +23,20 @@ struct schedule {
     float e;
 };
 
- struct defined_data{
-        int horizon_c;
-        int nbUsers;
-        int nbSatellites;
-        int nbSites;
-        int nbAntennas;
-        int nb_contacts;
-    };
+struct defined_data{
+    int horizon_c;
+    int nbUsers;
+    int nbSatellites;
+    int nbSites;
+    int nbAntennas;
+    int nb_contacts;
+};
 
-defined_data parse_contacts(list<float> &contacts, vector< vector <schedule> > &creneaux);
+defined_data parse_contacts(list<float> &contacts);
+defined_data parse_contacts_sites(list<float> &contacts);
 void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &userToSat, defined_data its_data);
 void parse_matrix_s(vector<float> contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data);
 void display_3Dmatrix(vector< vector < vector<int> > > &matrice);
-void display_2Dmatrix(vector< vector <schedule> > &matrice);
 void display_array(vector<float> &matrice);
 
 #endif

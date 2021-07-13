@@ -59,6 +59,30 @@ void quickSort(vector <schedule> &arr, int low, int high)
     }
 }
 
+void get_plan_checker(list<schedule> plan){
+    //cout << "coucou" << endl;
+    const char* output_file = "in_out/plan_checker.txt";
+    ofstream output(output_file);
+
+    int taille=plan.size();
+    output << taille <<endl;
+    for(int it=0; it < taille ; it++){
+        schedule temp= plan.front();
+        output << temp.sat << endl;
+        output << temp.s << endl;
+        output << temp.e << endl;
+        plan.pop_front();
+    }
+
+    /*while(plan.size() != 0){
+        cout << "sat n°" << plan.front().sat << endl;
+        cout << "temps début :" << plan.front().s << endl;
+        cout << "temps fin : " << plan.front().e << endl;
+        cout << "-----------------------------------" << endl;
+        plan.pop_front();
+    }*/
+}
+
 void get_plan(list<schedule> plan){
     //cout << "coucou" << endl;
     const char* output_file = "in_out/plan.txt";
@@ -127,8 +151,9 @@ float get_end_t( float s, vector<float> contacts){
     return res;
 }
 
-void solveMIP(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data, list<schedule> res)
+void solveMIP(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector<float> contacts, defined_data its_data)
 {
+    list<schedule> res;
     IloEnv env;
     try {
         
@@ -379,7 +404,8 @@ void solveMIP(vector< vector < vector <int> > > userToSat, vector< vector < vect
         }
 
         cout << "MIP end" <<endl;
-        
+            get_plan(res);
+
     }
     catch (IloException& ex) {
         cerr << "Error: " << ex << endl;
@@ -390,8 +416,9 @@ void solveMIP(vector< vector < vector <int> > > userToSat, vector< vector < vect
     env.end();
 }
 
-void solveMIP_basic(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data,list<schedule> res)
+void solveMIP_basic(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector<float> contacts, defined_data its_data)
 {
+    list<schedule> res;
     IloEnv env;
     try {
         
@@ -655,6 +682,8 @@ void solveMIP_basic(vector< vector < vector <int> > > userToSat, vector< vector 
         }
 
         cout << "MIP end" <<endl;
+            get_plan(res);
+
         
     }
     catch (IloException& ex) {
@@ -666,8 +695,11 @@ void solveMIP_basic(vector< vector < vector <int> > > userToSat, vector< vector 
     env.end();
 }
 
-void solveMIP_time(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data,list<schedule> res)
+void solveMIP_time(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector<float> contacts, defined_data its_data)
 {
+
+    list<schedule> res;
+
     IloEnv env;
     try {
         
@@ -937,7 +969,7 @@ void solveMIP_time(vector< vector < vector <int> > > userToSat, vector< vector <
 
 
         cout << "MIP end" <<endl;
-    get_plan(res);
+    get_plan_checker(res);
 
     }
     catch (IloException& ex) {
@@ -950,7 +982,7 @@ void solveMIP_time(vector< vector < vector <int> > > userToSat, vector< vector <
 }
 
 //ajouter contact dans param
-void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector< vector <schedule> > creneaux, vector<float> contacts, defined_data its_data,int contact)
+void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < vector <int> > > antennaToSat, vector<float> contacts, defined_data its_data,int contact1, int contact2)
 {
     IloEnv env;
     try {
@@ -968,7 +1000,7 @@ void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < 
 
             for(int j=0; j < its_data.nbSatellites; j++){
 
-                if(userToSat[i][j][contact]==0){
+                if(userToSat[i][j][contact1]==0){
                     t[i][j]=0;
                 }else{
                     t[i][j]=1;
@@ -983,7 +1015,7 @@ void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < 
                         //cout << "solver " << endl;
 
                     //cout << "solver 2" << endl;
-                    if(antennaToSat[i][j][contact]==0){
+                    if(antennaToSat[i][j][contact1]==0){
                         model.add(g[i][j]==0);
                                       
                     }
@@ -1006,7 +1038,7 @@ void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < 
 
         /////////////////////////////constraints
              int a;
-        cin>> a;
+        //cin>> a;
                 cout << "adding constraints to solver" << endl;
 
         //somme sur sat de g(a,sat) <= 1
@@ -1102,14 +1134,18 @@ void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < 
         
 
         env.out() << "Obj : " << cplex.getObjValue() << endl;
-        vector<int> res;
+        list<schedule> res;
         for (int i=0; i< its_data.nbSites*its_data.nbAntennas; i++){
             
             for (int j =0; j < its_data.nbSatellites; j++){
                 
 
                     if(cplex.getValue(g[i][j]) == 1){
-                        res.push_back(j);
+                        schedule slot;
+                        slot.sat=j;
+                        slot.s=contact1;
+                        slot.e=contact2;
+                        res.push_back(slot);
 
   
                 }
@@ -1118,9 +1154,8 @@ void solveMIP_ssc(vector< vector < vector <int> > > userToSat, vector< vector < 
 
         cout << "MIP end" <<endl;
 
-        for(int i=0; i < res.size(); i++){
-            cout << res[i] <<endl;
-        }
+    get_plan(res);
+
 
     }
     catch (IloException& ex) {
