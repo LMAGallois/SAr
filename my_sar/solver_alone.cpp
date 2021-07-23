@@ -10,6 +10,11 @@
 using namespace std;
 using namespace std::literals::chrono_literals;
 
+typedef IloArray<IloNumVarArray> NumVarMatrix;
+typedef IloArray<NumVarMatrix> NumVar3Matrix;
+
+ILOSTLBEGIN
+
 
 void display_array(vector<float> &matrice){
     for (int i=0; i < matrice.size(); i++){
@@ -198,12 +203,6 @@ void get_values (defined_data &its_data, vector< vector < vector <int> > > &user
   
 }
 
-
-typedef IloArray<IloNumVarArray> NumVarMatrix;
-typedef IloArray<NumVarMatrix> NumVar3Matrix;
-
-ILOSTLBEGIN
-
 /* This function takes last element as pivot, places
    the pivot element at its correct position in sorted
     array, and places all smaller (smaller than pivot)
@@ -369,37 +368,6 @@ void solveMIP(vector< vector < vector <int> > > &userToSat, vector< vector < vec
             }
         }
 
-        /*for (int k=0; k < its_data.nb_contacts; k++){
-            
-            for(int j=0; j< its_data.nbSatellites; j++){
-                
-                for(int i=0; i<its_data.nbUsers; i++){
-                    
-                    x[i]=NumVarMatrix(env, its_data.nbSatellites);
-                    x[i][j]=IloNumVarArray(env, its_data.nb_contacts, 0, 1, ILOINT);
-
-                    if(userToSat[i][j][k]==0){
-                            //cout << "solver 0" << endl;
-                            model.add(x[i][j][k]==0);
-                            //cout << "solver 0 end" << endl;
-                    }
-                    
-                    z[i]=IloNumVarArray(env, its_data.nb_contacts);                        
-                    z[i][k]=IloNumVar(env, 0,IloInfinity , ILOINT);  
-                }
-
-                for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
-                    
-                    g[i]=NumVarMatrix(env, its_data.nbSatellites);
-                    g[i][j]=IloNumVarArray(env, its_data.nb_contacts, 0, 1, ILOINT);
-                    
-                    if(antennaToSat[i][j][k]==0){
-                        model.add(g[i][j][k]==0);
-                    }
-                }
-            }
-        }*/
-
         cout << "nbcontacts : " << its_data.nb_contacts << endl;
         cout << "nbUsers : " << its_data.nbUsers << endl;
         cout << "nbSatellites : " << its_data.nbSatellites << endl;
@@ -480,10 +448,6 @@ void solveMIP(vector< vector < vector <int> > > &userToSat, vector< vector < vec
         model.add (IloMinimize(env, temp3 ));
         temp3.end();
 
-
-
-
-        
         cout << "solver ready" << endl;
 
         // Optimize
@@ -494,7 +458,6 @@ void solveMIP(vector< vector < vector <int> > > &userToSat, vector< vector < vec
         //cplex.setParam(IloCplex::EpGap, 0.01);     
         
         cplex.solve();
-        
         
         env.out() << "Obj : " << cplex.getObjValue() << endl;
 
@@ -602,17 +565,15 @@ void solveMIP_basic(vector< vector < vector <int> > > &userToSat, vector< vector
                 x[i][j]=IloNumVarArray(env, its_data.nb_contacts,0, 1, ILOINT);
 
                 for (int k=0; k < its_data.nb_contacts; k++){
-                        //cout << "solver " << endl;
-                        
-                        if(userToSat[i][j][k]==0){
-                            //cout << "solver 0" << endl;
-                            model.add(x[i][j][k]==0);
-                            //cout << "solver 0 end" << endl;
+                    //cout << "solver " << endl;
+                    
+                    if(userToSat[i][j][k]==0){
+                        //cout << "solver 0" << endl;
+                        model.add(x[i][j][k]==0);
+                        //cout << "solver 0 end" << endl;
 
-                        }
-                  
+                    }
                 }
-
             }
         }
         for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
@@ -635,37 +596,6 @@ void solveMIP_basic(vector< vector < vector <int> > > &userToSat, vector< vector
             }
             cout << "passe n°" << i << endl;
         }
-        
-
-        /*for (int k=0; k < its_data.nb_contacts; k++){
-            
-            for(int j=0; j< its_data.nbSatellites; j++){
-                
-                for(int i=0; i<its_data.nbUsers; i++){
-                    
-                    x[i]=NumVarMatrix(env, its_data.nbSatellites);
-
-                    x[i][j]=IloNumVarArray(env, its_data.nb_contacts,0, 1, ILOINT);
-
-                    if(userToSat[i][j][k]==0){
-                            //cout << "solver 0" << endl;
-                            model.add(x[i][j][k]==0);
-                            //cout << "solver 0 end" << endl;
-                    }
-                
-                }
-
-                for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
-
-                    g[i]=NumVarMatrix(env, its_data.nbSatellites);
-                    g[i][j]=IloNumVarArray(env, its_data.nb_contacts, 0, 1, ILOINT);
-
-                    if(antennaToSat[i][j][k]==0){
-                        model.add(g[i][j][k]==0);
-                    }
-                }
-            }
-        }*/
 
         cout << "nbcontacts : " << its_data.nb_contacts << endl;
         cout << "nbUsers : " << its_data.nbUsers << endl;
@@ -861,11 +791,6 @@ void solveMIP_basic(vector< vector < vector <int> > > &userToSat, vector< vector
 
 void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, vector< vector <schedule> > &creneaux, vector<float> &contacts, defined_data &its_data,list<schedule> res)
 {
-    //display_array(contacts);
-    //display_2Dmatrix(creneaux);
-    //display_3Dmatrix(userToSat);
-    //display_3Dmatrix(antennaToSat);
-
     IloEnv env;
     try {
         
@@ -895,20 +820,16 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
                         }
                 y[i][k]=IloNumVar(env, 0, IloInfinity, ILOINT);
                 }
-
             }
         }
         for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
                 g[i]=NumVarMatrix(env, its_data.nbSatellites);
             
             for(int j=0; j< its_data.nbSatellites; j++){
-                    g[i][j]=IloNumVarArray(env, its_data.nb_contacts, 0, 1, ILOINT);
-                
+                g[i][j]=IloNumVarArray(env, its_data.nb_contacts, 0, 1, ILOINT);
 
                 for (int k=0; k < its_data.nb_contacts; k++){
-                        //cout << "solver " << endl;
 
-                    //cout << "solver 2" << endl;
                     if(antennaToSat[i][j][k]==0){
                         model.add(g[i][j][k]==0);
                                       
@@ -919,7 +840,6 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
         cout << "passe n°" << i << endl;
 
         }
-        
 
         cout << "nbcontacts : " << its_data.nb_contacts << endl;
         cout << "nbUsers : " << its_data.nbUsers << endl;
@@ -946,8 +866,7 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
                     if(j+1 < its_data.nb_contacts){
                         temp += g[k][a][j] * (contacts[j+1] - contacts[j]);
                     }
-                    //model.add(temp += antennaToSat[k][a][j]);
-                    //cout << "solver C1" << endl;
+
                 }
 
                 for (int o=0; o < its_data.nbUsers; o++){
@@ -1015,8 +934,6 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
             }
         }
 
-
-
         cout << "adding constraints to solver" << endl;
 
         IloNumExpr temp3(env);
@@ -1025,9 +942,7 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
         for (int j=0; j < its_data.nb_contacts; j++){
             for (int a=0; a< its_data.nbUsers; a++){
 
-
-                temp3=temp3+y[a][j];
-                                
+                temp3=temp3+y[a][j];                  
             }
         }
 
@@ -1110,8 +1025,8 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
                 res.push_back(temp);
             }            
         }
-//on ordonne par date de debut croissante
-       vector <schedule> res_t(res.size());
+        //on ordonne par date de debut croissante
+        vector <schedule> res_t(res.size());
 
         taille=res.size();
         for(int i=0; i < taille; i++){
@@ -1127,8 +1042,6 @@ void solveMIP_time(vector< vector < vector <int> > > &userToSat, vector< vector 
         for(int i=0; i < taille; i++){
             res.push_back(res_t[i]);
         }
-
-
 
         cout << "MIP end" <<endl;
     get_plan(res);

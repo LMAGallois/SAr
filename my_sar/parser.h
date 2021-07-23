@@ -29,13 +29,15 @@ struct defined_data{
     int nbSatellites;
     int nbSites;
     int nbAntennas;
-    int nb_contacts;
 };
 
-defined_data parse_contacts(list<float> &contacts);
-defined_data parse_contacts_sites(list<float> &contacts);
-void parse_matrix_u(vector<float> contacts, vector< vector < vector <int> > > &userToSat, defined_data its_data);
-void parse_matrix_s(vector<float> contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data);
+defined_data get_data ();
+
+void parse_contacts(vector<float> &contacts, defined_data its_data);
+
+void parse_matrix_u( vector < float>  &contacts,vector< vector < vector <int> > > &userToSat, defined_data its_data);
+void parse_matrix_s(vector < float> &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data);
+
 void display_3Dmatrix(vector< vector < vector<int> > > &matrice);
 void display_array(vector<float> &matrice);
 

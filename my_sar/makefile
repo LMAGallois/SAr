@@ -83,8 +83,8 @@ parser_alone.o: parser_alone.cpp
 solver_alone.o: solver_alone.cpp
 	$(CCC) -c $(CCFLAGS) solver_alone.cpp -o solver_alone.o
 
-sched_Cband: main.o solver.o parser.o checker.o
-	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o sched_Cband main.o solver.o parser.o checker.o $(CCLNFLAGS)
+sched_Cband: main.o solver.o parser.o checker.o checker_bounds.o parser_sites.o solver_sites.o
+	$(CCC) $(CCFLAGS) $(CCLNDIRS) -o sched_Cband main.o solver.o parser.o checker.o checker_bounds.o parser_sites.o solver_sites.o $(CCLNFLAGS)
 
 main.o:  main.cpp
 	$(CCC) -c $(CCFLAGS) main.cpp -o main.o
@@ -97,3 +97,12 @@ solver.o:  solver.cpp
 
 checker.o:  checker.cpp
 	$(CCC) -c $(CCFLAGS)  checker.cpp -o checker.o
+
+checker_bounds.o:  checker_bounds.cpp
+	$(CCC) -c $(CCFLAGS)  checker_bounds.cpp -o checker_bounds.o
+
+solver_sites.o:  solver_sites.cpp
+	$(CCC) -c $(CCFLAGS)  solver_sites.cpp -o solver_sites.o
+
+parser_sites.o:  parser_sites.cpp
+	$(CCC) -c $(CCFLAGS)  parser_sites.cpp -o parser_sites.o
