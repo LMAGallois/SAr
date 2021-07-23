@@ -342,7 +342,7 @@ void parse_matrix_s(vector < vector <vector <float> > > &contacts, vector< vecto
                     if(contacts[j][0][0] >= s && contacts[j+1][0][0] <= e){
                         
                         for(int k=0; k < its_data.nbAntennas; k++){
-                            antennaToSat[i+k][sat][j]=1;
+                            antennaToSat[i*4+k][sat][j]=1;
                         }
                     }
                 }
@@ -351,6 +351,8 @@ void parse_matrix_s(vector < vector <vector <float> > > &contacts, vector< vecto
         }
         cout << "------ end reading ---------" << endl;
     }
+    cout << "------ end instantiating antennaToSat---------" << endl;
+
 }
 
 void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data){
@@ -366,7 +368,6 @@ void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vecto
             }
         }
     }
-
     string str;
     int found;
     int c;
@@ -377,6 +378,9 @@ void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vecto
     float s;
     float e;
     float d;
+    int j_max=contacts.size();
+    int m_max=contacts[0].size();
+    int l_max=contacts[0][0].size();
     const char* cfile;
     
     cout << "------ start reading site ---------" << endl;
@@ -423,14 +427,16 @@ void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vecto
 
             if(s < its_data.horizon_c && sat < its_data.nbSatellites){
                 
-                for (int j=0; j < 2854-1; j++ ){
-                for (int l=0; l < 2854-1; l++ ){
-                for (int m=0; m < 2854-1; m++ ){
-
+                for (int j=0; j < j_max-1; j++ ){
+                    l_max=contacts[j].size();
+                for (int l=0; l < l_max; l++ ){
+                    m_max=contacts[j][l].size();
+                for (int m=0; m < m_max; m++ ){
+                    cout <<"coucou"<<endl;
                     if(contacts[j][l][m] >= s && contacts[j+1][l][m] <= e){
                         
                         for(int k=0; k < its_data.nbAntennas; k++){
-                            antennaToSat[i+k][sat][j]=1;
+                            antennaToSat[i*4+k][sat][j]=1;
                         }
                     }
                 }

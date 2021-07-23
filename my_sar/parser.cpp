@@ -416,7 +416,7 @@ void parse_matrix_s(vector < float> &contacts, vector< vector < vector <int> > >
                     if(contacts[j] >= s && contacts[j+1] <= e){
                         
                         for(int k=0; k < its_data.nbAntennas; k++){
-                            antennaToSat[i+k][sat][j]=1;
+                            antennaToSat[i*4+k][sat][j]=1;
                         }
                     }
                 }
