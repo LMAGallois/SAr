@@ -23,7 +23,7 @@ void display_3Dmatrix(vector< vector < vector<int> > > &matrice){
         for (int j=0; j < matrice[i].size(); j++){
             cout << "satellite n° " << j << endl; 
             
-            for (int k=0; k < matrice[i][j].size(); k++){
+            for (int k=987; k < 988; k++){
                 cout << matrice[i][j][k] << " ";
             }
             cout << endl;
@@ -120,7 +120,7 @@ void parse_contacts(vector<float> &contacts, defined_data its_data)
     found=-1;
     c=0;
 
-    while(c < its_data.nbUsers)
+    while(c < 20)
     {
         found=-1;
         while(found==-1)
@@ -330,7 +330,7 @@ void parse_matrix_u(vector < float > &contacts ,vector< vector < vector <int> > 
                             //cout << "coucou "<< contacts[i][0][0] <<endl;
 
                     if(contacts[i] >= s && contacts[i+1] <= e){
-                        userToSat[0][sat][i]=1;
+                        userToSat[c][sat][i]=1;
                     }
                 }
             }

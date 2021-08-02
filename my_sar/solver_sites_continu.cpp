@@ -1,4 +1,4 @@
-#include "solver_sites.h"
+#include "solver_sites_continu.h"
 #include <iostream>
 #include <string>
 
@@ -10,9 +10,9 @@ typedef IloArray<IloNumArray> NumMatrix;
 
 ILOSTLBEGIN
 
-void get_plan_checker(list<schedule_ssc> plan){
+void get_plan_checker_continu(list<schedule_ssc> plan){
     //cout << "coucou" << endl;
-    const char* output_file = "in_out/plan_checker_60.txt";
+    const char* output_file = "in_out/plan_checker_continu.txt";
     ofstream output(output_file, ios::app);
 
     int taille=plan.size();
@@ -27,12 +27,11 @@ void get_plan_checker(list<schedule_ssc> plan){
         output << temp.contact1 << endl;
         output << temp.contact11 << endl;
         output << temp.contact111 << endl;
-
         plan.pop_front();
     }
 }
 
-vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2)
+vector<schedule_ssc> solveMIP_ssc_continu(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2)
 {
     vector<schedule_ssc> ret;
     IloEnv env;
@@ -50,11 +49,7 @@ vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_si
             t[i]=IloNumArray(env, its_data.nbSatellites, 0, 1, ILOFLOAT);
 
             for(int j=0; j < its_data.nbSatellites; j++){
-                if(userToSat[i][j][contact1]==0){
-                    t[i][j]=0;
-                }else{
-                    t[i][j]=1;
-                }
+                t[i][j]=userToSat[i][j][contact1];
             }
         }
 
@@ -171,7 +166,7 @@ vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_si
             }
         }    
         cout << "MIP end" <<endl;
-        get_plan_checker(res);
+        get_plan_checker_continu(res);
     }
     catch (IloException& ex) {
         cerr << "Error: " << ex << endl;

@@ -5,15 +5,15 @@
 #include <stdio.h>
 #include <fstream>
 #include <limits.h>
-#include "parser_sites.h"
+#include "parser_sites_continu.h"
 #include "parser.h"
 
 using namespace std;    
 
-void parse_contacts_sites(vector< vector < vector <float> > > &contacts, defined_data its_data)
+void parse_contacts_sites_continu(vector< vector < vector <float> > > &contacts, defined_data its_data)
 {
     list<float> contacts_temp;
-    const char* output_file = "in_out/contacts_sites_h.txt";
+    const char* output_file = "in_out/contacts_sites_continu.txt";
 
     string str;
     int c;
@@ -181,7 +181,7 @@ void parse_contacts_sites(vector< vector < vector <float> > > &contacts, defined
     cout << "------ end parsing ---------" << endl;
 }
 
-void parse_matrix_u(vector < vector <vector <float> > > &contacts ,vector< vector < vector <float> > > &userToSat, defined_data its_data){
+void parse_matrix_u_continu(vector < vector <vector <float> > > &contacts ,vector< vector < vector <float> > > &userToSat, defined_data its_data){
     vector <float> c_t;
     vector < vector <float> > sat_t;
 
@@ -253,10 +253,23 @@ void parse_matrix_u(vector < vector <vector <float> > > &contacts ,vector< vecto
             sat=sat-1;
             if(s < its_data.horizon_c && sat < its_data.nbSatellites){
                 int i=0;
-                while (i < contacts.size()-1 && contacts[i+1][0][0] <= e ){
+                while (i < contacts.size()-1 &&  contacts[i+1][0][0] <= e){
 
-                    if(contacts[i][0][0] >= s ){
+                    if(contacts[i][0][0] >= s &&  contacts[i+1][0][0] <= e ){
                         userToSat[c][sat][i]=1;
+                    }
+                    //pas utilisé car while s arrte quand e est trop petit
+                    else if(contacts[i][0][0] >= s &&  contacts[i+1][0][0] > e && e > contacts[i][0][0]){
+                        userToSat[c][sat][i]=(e-contacts[i][0][0])/(contacts[i+1][0][0]-contacts[i][0][0]);
+                    }
+                    else if(contacts[i][0][0] < s &&  contacts[i+1][0][0] <= e && s < contacts[i+1][0][0]){
+                        userToSat[c][sat][i]=(contacts[i+1][0][0]-s)/(contacts[i+1][0][0]-contacts[i][0][0]);
+
+                    }
+                    //pas utilisé car slot de visi assez long
+                    else if(contacts[i][0][0] < s &&  contacts[i+1][0][0] > e ){
+                        userToSat[c][sat][i]=(e-s)/(contacts[i+1][0][0]-contacts[i][0][0]);
+
                     }
                     i++;
                 }
@@ -268,9 +281,11 @@ void parse_matrix_u(vector < vector <vector <float> > > &contacts ,vector< vecto
     }
 }
 
-void parse_matrix_s(vector < vector <vector <float> > > &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data){
+void parse_matrix_s_continu(vector < vector <vector <float> > > &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data){
     vector <int> c_t;
     vector < vector <int> > sat_t;
+
+
 
     for(int i=0; i < its_data.nbSites*its_data.nbAntennas ; i++){
         antennaToSat.push_back(sat_t);
@@ -357,7 +372,7 @@ void parse_matrix_s(vector < vector <vector <float> > > &contacts, vector< vecto
 
 }
 
-void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vector <vector< vector <vector <vector <int> > > > > &antennaToSat, defined_data its_data){
+void parse_matrix_s_precise_continu(vector < vector <vector <float> > > &contacts, vector <vector<vector< vector < vector <int> > > > >&antennaToSat, defined_data its_data){
     vector<int> ccc_t;
     vector < vector<int> >cc_t;
     vector < vector < vector <int> > > c_t;
@@ -478,7 +493,6 @@ void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vecto
                                     }
                                 }
                             }
-                            
                         }
                     }
                 }
@@ -488,11 +502,11 @@ void parse_matrix_s_precise(vector < vector <vector <float> > > &contacts, vecto
     }
 }
 
-void get_parser_sites (vector< vector < vector<float> > > &contacts_sites, vector< vector < vector <float> > > &userToSat,vector< vector < vector <int> > >&antennaToSat, vector <vector<vector< vector < vector <int> > > > >&antennaToSatP, defined_data its_data ){
-    parse_contacts_sites(contacts_sites, its_data);
-    parse_matrix_s(contacts_sites, antennaToSat, its_data);
-    parse_matrix_u(contacts_sites, userToSat, its_data);
+void get_parser_sites_continu (vector< vector < vector<float> > > &contacts_sites,vector< vector < vector <float> > > &userToSat,vector< vector < vector <int> > >&antennaToSat, vector <vector<vector< vector < vector <int> > > > >&antennaToSatP, defined_data its_data ){
+    parse_contacts_sites_continu(contacts_sites, its_data);
+    parse_matrix_s_continu(contacts_sites, antennaToSat, its_data);
+    parse_matrix_u_continu(contacts_sites, userToSat, its_data);
     //display_3Dmatrix(antennaToSat);
-    parse_matrix_s_precise(contacts_sites, antennaToSatP, its_data);
+    parse_matrix_s_precise_continu(contacts_sites, antennaToSatP, its_data);
 }
     

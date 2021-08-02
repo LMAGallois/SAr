@@ -1,4 +1,4 @@
-#include "solver_sites.h"
+#include "solver_sites_60.h"
 #include <iostream>
 #include <string>
 
@@ -10,7 +10,7 @@ typedef IloArray<IloNumArray> NumMatrix;
 
 ILOSTLBEGIN
 
-void get_plan_checker(list<schedule_ssc> plan){
+void get_plan_checker_60(list<schedule_ssc> plan){
     //cout << "coucou" << endl;
     const char* output_file = "in_out/plan_checker_60.txt";
     ofstream output(output_file, ios::app);
@@ -32,7 +32,7 @@ void get_plan_checker(list<schedule_ssc> plan){
     }
 }
 
-vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2)
+vector<schedule_ssc> solveMIP_ssc_60(vector< vector <float> > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2)
 {
     vector<schedule_ssc> ret;
     IloEnv env;
@@ -131,6 +131,18 @@ vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_si
 
         }
 
+        /*IloExpr temp4(env);
+            for(int i=0; i < its_data.nbSites*its_data.nbAntennas; i++){
+
+                for(int j=0; j< its_data.nbSatellites; j++){
+                    d[i][j]
+                }
+            }
+
+
+        temp4.end();
+
+        (1400/(1400+400)*IloSum(tau)) + (400/(1400+400)*)*/
         cout << "adding constraints to solver" << endl;
         model.add (IloMaximize(env, IloSum(tau) ));
         cout << "solver ready" << endl;
@@ -163,15 +175,15 @@ vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_si
                         slot.contact1=contact1;
                         slot.contact11=0;
                         slot.contact111=0;
-                        slot.s=contacts_sites[contact1][0][0];
-                        slot.e=contacts_sites[contact2][0][0];
+                        slot.s=contacts_sites[contact1][0];
+                        slot.e=contacts_sites[contact2][0];
                         res.push_back(slot);
                         ret.push_back(slot);
                 }
             }
         }    
         cout << "MIP end" <<endl;
-        get_plan_checker(res);
+        get_plan_checker_60(res);
     }
     catch (IloException& ex) {
         cerr << "Error: " << ex << endl;

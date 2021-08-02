@@ -13,10 +13,6 @@
 
 using namespace std;
 
-void parse_contacts_sites(vector < vector <vector <float> > > &contacts, defined_data its_data);
-void parse_matrix_s(vector < vector <vector <float> > > &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data);
-void parse_matrix_u(vector < vector <vector <float> > > &contacts ,vector< vector < vector <int> > > &userToSat, defined_data its_data);
-void get_parser_sites (vector< vector < vector<float> > > &contacts_sites,vector< vector < vector <int> > > &userToSat,vector< vector < vector <int> > >&antennaToSat, vector< vector < vector <int> > > &antennaToSatP, defined_data its_data );
-void parse_matrix_s_precise(vector< vector < vector<float> > > &contacts_sites, vector< vector < vector <int> > > &antennaToSatP, defined_data its_data);
+void get_parser_sites (vector< vector < vector<float> > > &contacts_sites, vector< vector < vector <float> > > &userToSat,vector< vector < vector <int> > >&antennaToSat, vector < vector< vector < vector < vector <int> > > > > &antennaToSatP, defined_data its_data );
 
 #endif

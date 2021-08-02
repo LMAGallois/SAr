@@ -18,13 +18,15 @@ ILOSTLBEGIN
 struct schedule_ssc {
     int s;
     int e;
+    int contact1;
+    int contact11;
+    int contact111;
     int sat;
     int site;
     int antenna;
 
 };
 
-void get_plan_checker(list<schedule_ssc> plan);
-void solveMIP_ssc(vector< vector < vector <int> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2);
+vector<schedule_ssc> solveMIP_ssc(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2);
 
 #endif

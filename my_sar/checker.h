@@ -11,9 +11,9 @@
 
 using namespace std;
 
-void check_1sat(vector < vector < vector < int> > > userToSat, defined_data its_data);
-void check_2sat_handover(vector < vector < vector < int> > > userToSat, defined_data its_data);
-void check_1sat_handover(vector < vector < vector < int> > > userToSat, defined_data its_data);
-void check_2sat(vector < vector < vector < int> > > userToSat, defined_data its_data);
+void check_1sat(    vector< vector < vector<float> > > userToSat, defined_data its_data);
+void check_2sat_handover(    vector< vector < vector<float> > > userToSat, defined_data its_data);
+void check_1sat_handover(    vector< vector < vector<float> > > userToSat, defined_data its_data);
+void check_2sat(    vector< vector < vector<float> > > userToSat, defined_data its_data);
 
 #endif

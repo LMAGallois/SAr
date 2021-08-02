@@ -13,21 +13,23 @@
 
 using namespace std;
 
-void check_2sat_handover(vector < vector < vector < int> > > userToSat, defined_data its_data){
+
+void check_2sat_handover( vector< vector < vector<float> > > userToSat, defined_data its_data){
     int index = min(its_data.nbSatellites, its_data.nbAntennas*its_data.nbSites);
-    const char* cfile = "in_out/plan_checker.txt";
+    const char* cfile = "in_out/plan_checker_h0.txt";
     ifstream file(cfile);
     if ( !file ) {
         cerr << "No such file: " << cfile << endl;
         throw(-1);
     }
 
-    const char* cfile2 = "in_out/checker_stats.txt";
+    const char* cfile2 = "in_out/MIP_ssc_h0/checker_stats_2sat_h.txt";
 //    ofstream file2(cfile2, ios::app);
     ofstream file2(cfile2);
 
+    int taille=326169;
 
-    int taille=38411;
+    //int taille=19760;
     vector < vector <schedule_ssc> > plan;
     vector <int> aff_1(index);
     vector <int> aff(index);
@@ -36,7 +38,12 @@ void check_2sat_handover(vector < vector < vector < int> > > userToSat, defined_
     float antenna;
     int s;
     int e;
+    int contact1;
+    int contact11;
+    int contact111;
     int s_1=-1;
+    float min=INT_MAX;
+    float max=INT_MIN;
     
     for(int i =0; i < taille; i++){
         file >> s;
@@ -44,14 +51,33 @@ void check_2sat_handover(vector < vector < vector < int> > > userToSat, defined_
         file >> sat;
         file >> site;
         file >> antenna;
+        file>>contact1;
+        file>>contact11;
+        file>>contact111;
 
         if(s_1 ==-1 || s_1!= s){
             vector <schedule_ssc> temp;
             plan.push_back(temp);
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }else{
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }
 
@@ -59,95 +85,110 @@ void check_2sat_handover(vector < vector < vector < int> > > userToSat, defined_
     }
     taille=plan.size();
     int taille2;
-    vector <int> people(its_data.nbUsers);
-    vector <float> covering_slot(taille);
-    int handover=0;
+    float nb=0;
+    float nb2=0;
+    float dureeSlot=0;
+    int nb_h=0;
+    int sat_wout_h=0;
+    int nb_sat=0;
 
     for(int i=0; i <taille; i ++ ){
 
         taille2=plan[i].size();
-        vector <int> people_al(its_data.nbUsers);
+        nb=0;
 
-        for(int j=0; j < taille2; j++){
-            handover=0;
-            schedule_ssc temp=plan[i][j];
-            aff[temp.site*4+temp.antenna]=temp.sat;
+        for(int k=0; k < its_data.nbUsers; k++){        
+            sat_wout_h=0;
+            nb_sat=0;
+
+            for(int j=0; j < taille2; j++){
+                schedule_ssc temp=plan[i][j];
+                aff[temp.site*4+temp.antenna]=temp.sat;
+                dureeSlot=temp.e-temp.s; 
                 
+                if(i==0 && aff[temp.site*4+temp.antenna]!=-1 && userToSat[k][temp.sat][temp.contact1]==1){
+                    nb_sat++;
 
-            if( i!=0 && aff[temp.site*4+temp.antenna]!=aff_1[temp.site*4+temp.antenna]){
-                handover=1;
+                }
+                if( i!=0  && aff[temp.site*4+temp.antenna]!=-1 && userToSat[k][temp.sat][temp.contact1]==1){
+                    nb_sat++;
+                    if(aff[temp.site*4+temp.antenna]==aff_1[temp.site*4+temp.antenna]){
+                        sat_wout_h++;
+                    }
+                }
+                if(k==0 && i!=0 && (aff[temp.site*4+temp.antenna]!=aff_1[temp.site*4+temp.antenna]|| (aff_1[temp.site*4+temp.antenna]!=-1 && aff[temp.site*4+temp.antenna]==-1))){
+                    nb_h++;
+                }
+
             }
-
-            for(int k=0; k < its_data.nbUsers; k++){        
-                
-                if((people_al[k] ==0 || people_al[k] ==1) && userToSat[k][temp.sat][temp.s]==1){
-                  
-                    people_al[k]++;
-                    if(people_al[k]==2){
-                        if(handover==1){
-                            people[k]+=540;
-                        }else{
-                            people[k]+=600;
-                        }
-                        
+            
+            if(i==0){
+                if(nb_sat>=2){
+                    nb2+=dureeSlot;
+                    nb+=dureeSlot;
+                }
+            }else{
+                if(nb_sat>=2){
+                    if(sat_wout_h>=2){
+                        nb2+=dureeSlot;
+                        nb+=dureeSlot;
+                    }else{
+                        nb2+=dureeSlot-60;
+                        nb+=dureeSlot-60;
                     }
                 }
                 
-            }
-            for(int d=0; d < index; d++){
-                aff_1[d]=-1;
-            }
-            aff_1[temp.site*4+temp.antenna]=temp.sat;
+            } 
+        
         }
         
-        float nv=0;
-
-        for(int i=0; i< its_data.nbUsers; i ++){
-            if(people_al[i]==0 || people_al[i]==1){
-                nv++;
-            }
+        for(int d=0; d < index; d++){
+            aff_1[d]=-1;
         }
-
-        float covering_slot_nb = (((1400*600) - nv*600)*100)/(1400*600);
-        covering_slot[i]=covering_slot_nb;
+        for(int j=0; j < taille2; j++){
+            aff_1[plan[i][j].site*4+plan[i][j].antenna]=plan[i][j].sat;
+        }
+        float covering_slot_nb=0;
+        if(nb>0){
+            covering_slot_nb = (nb*100)/(1400*dureeSlot);
+        }
+        if(covering_slot_nb<min){
+            min=covering_slot_nb;
+        }
+        if(covering_slot_nb>max){
+            max=covering_slot_nb;
+        }
         file2 << "slot "<< i <<endl;
         file2 << covering_slot_nb<<"%"<<endl;
         file2 << "----------------------------"<<endl;
- 
+        
     }
-    float nb=0;
-    for(int i=0; i < taille; i++){
-        nb+=covering_slot[i];
-    }
-
-    float nb2=0;
-    for(int i=0; i < its_data.nbUsers; i++){
-        nb2+=people[i];
-    }
-
-    float average_covering_slot=nb/taille;
     float covering_nb = (nb2*100)/(1400*its_data.horizon_c);
-    file2<<"average covering slot : "<< average_covering_slot<<"%"<<endl;
+
     file2 << "covering nb sur la totalité du temps: "<<covering_nb <<"%"<<endl;
+    file2 << "min covering slot : "<<min<<"%"<<endl;
+    file2 << "max covering slot : "<<max<<"%"<<endl;
+    file2<< "nb_h : "<<nb_h<<endl;
 
 }
 
-void check_2sat(vector < vector < vector < int> > > userToSat, defined_data its_data){
+void check_2sat(    vector< vector < vector<float> > > userToSat, defined_data its_data){
     int index = min(its_data.nbSatellites, its_data.nbAntennas);
     
-    const char* cfile = "in_out/plan_checker.txt";
+    const char* cfile = "in_out/plan_checker_h0.txt";
     ifstream file(cfile);
     if ( !file ) {
         cerr << "No such file: " << cfile << endl;
         throw(-1);
     }
 
-    const char* cfile2 = "in_out/checker_stats.txt";
+    const char* cfile2 = "in_out/MIP_ssc_h0/checker_stats_2sat.txt";
 //    ofstream file2(cfile2, ios::app);
     ofstream file2(cfile2);
 
+    int taille=326169;
 
-    int taille=38411;
+ //   int taille=19760;
     vector < vector <schedule_ssc> > plan;
     int sat;
     float site;
@@ -155,21 +196,45 @@ void check_2sat(vector < vector < vector < int> > > userToSat, defined_data its_
     int s;
     int e;
     int s_1=-1;
-    
+    float min=INT_MAX;
+    float max=INT_MIN;
+    int contact1;
+    int contact11;
+    int contact111;
+
     for(int i =0; i < taille; i++){
         file >> s;
         file >> e;
         file >> sat;
         file >> site;
         file >> antenna;
+        file>>contact1;
+        file>>contact11;
+        file>>contact111;
 
         if(s_1 ==-1 || s_1!= s){
             vector <schedule_ssc> temp;
             plan.push_back(temp);
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }else{
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }
 
@@ -177,74 +242,76 @@ void check_2sat(vector < vector < vector < int> > > userToSat, defined_data its_
     }
     taille=plan.size();
     int taille2;
-    vector <int> people(its_data.nbUsers);
-    vector <float> covering_slot(taille);
+    float nb=0;
+    float nb2=0;
+    float dureeSlot=0;
+    int nb_sat=0;
 
     for(int i=0; i <taille; i ++ ){
 
         taille2=plan[i].size();
-        vector <int> people_al(its_data.nbUsers);
+        nb=0;
 
-        for(int j=0; j < taille2; j++){
-            schedule_ssc temp=plan[i][j];
+        for(int k=0; k < its_data.nbUsers; k++){        
+            nb_sat=0;
 
-            for(int k=0; k < its_data.nbUsers; k++){        
+            for(int j=0; j < taille2; j++){
+                schedule_ssc temp=plan[i][j];
+                dureeSlot=temp.e-temp.s; 
                 
-                if((people_al[k] ==0 || people_al[k] ==1) && userToSat[k][temp.sat][temp.s]==1){
-                  
-                    people_al[k]++;
-                    if(people_al[k]==2){
-                        people[k]+=600;
+                if( temp.sat!=-1){
+                    if(userToSat[k][temp.sat][temp.contact1]==1){
+                        nb_sat++;
                     }
                 }
-                
+
             }
-        }
+
+            if(nb_sat >= 2){
+                nb2+=dureeSlot;
+                nb+=dureeSlot;
+            }
         
-        float nv=0;
-
-        for(int i=0; i< its_data.nbUsers; i ++){
-            if(people_al[i]==0 || people_al[i]==1){
-                nv++;
-            }
         }
 
-        float covering_slot_nb = (((1400*600) - nv*600)*100)/(1400*600);
-        covering_slot[i]=covering_slot_nb;
+        float covering_slot_nb=0;
+        if(nb>0){
+            covering_slot_nb = (nb*100)/(1400*dureeSlot);
+        }        
+        if(covering_slot_nb<min){
+            min=covering_slot_nb;
+        }
+        if(covering_slot_nb>max){
+            max=covering_slot_nb;
+        }
         file2 << "slot "<< i <<endl;
         file2 << covering_slot_nb<<"%"<<endl;
         file2 << "----------------------------"<<endl;
         
     }
-    float nb=0;
-    for(int i=0; i < taille; i++){
-        nb+=covering_slot[i];
-    }
-    float nb2=0;
-    for(int i=0; i < its_data.nbUsers; i++){
-        nb2+=people[i];
-    }
-    float average_covering_slot=nb/taille;
+
     float covering_nb = (nb2*100)/(1400*its_data.horizon_c);
-    file2<<"average covering slot : "<< average_covering_slot<<"%"<<endl;
     file2 << "covering nb sur la totalité du temps: "<<covering_nb <<"%"<<endl;
+    file2 << "min covering slot : "<<min<<"%"<<endl;
+    file2 << "max covering slot : "<<max<<"%"<<endl;
 
 }
 
-void check_1sat(vector < vector < vector < int> > > userToSat, defined_data its_data){
-    const char* cfile = "in_out/plan_checker.txt";
+void check_1sat(    vector< vector < vector<float> > > userToSat, defined_data its_data){
+    const char* cfile = "in_out/plan_checker_h0.txt";
     ifstream file(cfile);
     if ( !file ) {
         cerr << "No such file: " << cfile << endl;
         throw(-1);
     }
 
-    const char* cfile2 = "in_out/checker_stats.txt";
+    const char* cfile2 = "in_out/MIP_ssc_h0/checker_stats_1sat.txt";
 //    ofstream file2(cfile2, ios::app);
     ofstream file2(cfile2);
 
+    int taille=326169;
 
-    int taille=38411;
+//    int taille=19760;
     vector < vector <schedule_ssc> > plan;
 
     int sat;
@@ -253,21 +320,45 @@ void check_1sat(vector < vector < vector < int> > > userToSat, defined_data its_
     int s;
     int e;
     int s_1=-1;
-    
+    float min=INT_MAX;
+    float max=INT_MIN;
+    int contact1;
+    int contact11;
+    int contact111;
+
     for(int i =0; i < taille; i++){
         file >> s;
         file >> e;
         file >> sat;
         file >> site;
         file >> antenna;
+        file>>contact1;
+        file>>contact11;
+        file>>contact111;
 
         if(s_1 ==-1 || s_1!= s){
             vector <schedule_ssc> temp;
             plan.push_back(temp);
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }else{
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }
 
@@ -275,72 +366,78 @@ void check_1sat(vector < vector < vector < int> > > userToSat, defined_data its_
     }
     taille=plan.size();
     int taille2;
-    vector <int> people(its_data.nbUsers);
-    vector <float> covering_slot(taille);
+    float nb=0;
+    float nb2=0;
+    float dureeSlot=0;
+    int nb_sat=0;
 
     for(int i=0; i <taille; i ++ ){
 
         taille2=plan[i].size();
-        vector <int> people_al(its_data.nbUsers);
+        nb=0;
+       
+        for(int k=0; k < its_data.nbUsers; k++){        
+            nb_sat=0; 
 
-        for(int j=0; j < taille2; j++){
-            
-            schedule_ssc temp=plan[i][j];
+            for(int j=0; j < taille2; j++){
+                schedule_ssc temp=plan[i][j];
+                dureeSlot=temp.e-temp.s; 
+                
+                if( temp.sat!=-1){
+                    if(userToSat[k][temp.sat][temp.contact1]==1){
+                        nb_sat++;
+                    }
+                }
 
-            for(int k=0; k < its_data.nbUsers; k++){        
-
-                if(people_al[k] != -1 && userToSat[k][temp.sat][temp.s]==1){
-                    people[k]+=600;
-                    people_al[k]=-1;
-                }           
             }
-        }
+
+            if(nb_sat >= 1){
+                nb2+=dureeSlot;
+                nb+=dureeSlot;
+            }
         
-        float nv=0;
-
-        for(int i=0; i< its_data.nbUsers; i ++){
-            if(people_al[i]==0 ){
-                nv++;
-            }
         }
 
-        float covering_slot_nb = (((1400*600) - nv*600)*100)/(1400*600);
-        covering_slot[i]=covering_slot_nb;
+        float covering_slot_nb=0;
+        if(nb>0){
+            covering_slot_nb = (nb*100)/(1400*dureeSlot);
+        }
+        if(covering_slot_nb>max){
+            max=covering_slot_nb;
+        }
+        if(covering_slot_nb<min){
+            min=covering_slot_nb;
+        }
         file2 << "slot "<< i <<endl;
         file2 << covering_slot_nb<<"%"<<endl;
         file2 << "----------------------------"<<endl;
         
     }
-    float nb=0;
-    for(int i=0; i < taille; i++){
-        nb+=covering_slot[i];
-    }
-    float nb2=0;
-    for(int i=0; i < its_data.nbUsers; i++){
-        nb2+=people[i];
-    }
-    float average_covering_slot=nb/taille;
+
     float covering_nb = (nb2*100)/(1400*its_data.horizon_c);
-    file2<<"average covering slot : "<< average_covering_slot<<"%"<<endl;
     file2 << "covering nb sur la totalité du temps: "<<covering_nb <<"%"<<endl;
+    file2 << "min covering slot : "<<min<<"%"<<endl;
+    file2 << "max covering slot : "<<max<<"%"<<endl;
 
 }
 
-void check_1sat_handover(vector < vector < vector < int> > > userToSat, defined_data its_data){
+void check_1sat_handover(    vector< vector < vector<float> > > userToSat, defined_data its_data){
     int index = min(its_data.nbSatellites, its_data.nbAntennas*its_data.nbSites);
-    const char* cfile = "in_out/plan_checker.txt";
+    const char* cfile = "in_out/plan_checker_h0.txt";
     ifstream file(cfile);
     if ( !file ) {
         cerr << "No such file: " << cfile << endl;
         throw(-1);
     }
 
-    const char* cfile2 = "in_out/checker_stats.txt";
+    const char* cfile2 = "in_out/MIP_ssc_h0/checker_stats_1sat_h.txt";
 //    ofstream file2(cfile2, ios::app);
     ofstream file2(cfile2);
 
 
-    int taille=38411;
+    int taille=326169;
+  //   int taille=57080;
+
     vector < vector <schedule_ssc> > plan;
     vector <int> aff_1(index);
     vector <int> aff(index);
@@ -350,6 +447,9 @@ void check_1sat_handover(vector < vector < vector < int> > > userToSat, defined_
     int s;
     int e;
     int s_1=-1;
+    int contact1;
+    int contact11;
+    int contact111;
     
     for(int i =0; i < taille; i++){
         file >> s;
@@ -357,14 +457,33 @@ void check_1sat_handover(vector < vector < vector < int> > > userToSat, defined_
         file >> sat;
         file >> site;
         file >> antenna;
+        file>>contact1;
+        file>>contact11;
+        file>>contact111;
 
         if(s_1 ==-1 || s_1!= s){
             vector <schedule_ssc> temp;
             plan.push_back(temp);
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }else{
-            schedule_ssc slot={s,e, sat, site, antenna};
+            schedule_ssc slot;
+            slot.sat=sat;
+            slot.s=s;
+            slot.e=e;
+            slot.site=site;
+            slot.antenna=antenna;
+            slot.contact1=contact1;
+            slot.contact11=contact11;
+            slot.contact111=contact111;
             plan.back().push_back(slot);
         }
 
@@ -372,67 +491,92 @@ void check_1sat_handover(vector < vector < vector < int> > > userToSat, defined_
     }
     taille=plan.size();
     int taille2;
-    vector <int> people(its_data.nbUsers);
-    vector <float> covering_slot(taille);
-    int handover=0;
+    float dureeSlot=0;
+    float min=INT_MAX;
+    float max=INT_MIN;
+    float nb=0;
+    float nb2=0;
+    int nb_h=0;
+    int sat_wout_h=0;
+    int nb_sat=0;
 
     for(int i=0; i <taille; i ++ ){
 
         taille2=plan[i].size();
-        vector <int> people_al(its_data.nbUsers);
+        nb=0;
 
-        for(int j=0; j < taille2; j++){
-                        handover=0;
+        for(int k=0; k < its_data.nbUsers; k++){        
+            sat_wout_h=0;
+            nb_sat=0;
 
-            schedule_ssc temp=plan[i][j];
-            aff[temp.site*4+temp.antenna]=temp.sat;
+            for(int j=0; j < taille2; j++){
+                schedule_ssc temp=plan[i][j];
+                aff[temp.site*4+temp.antenna]=temp.sat;
+                dureeSlot=temp.e-temp.s; 
+                
+                if(i==0 && aff[temp.site*4+temp.antenna]!=-1 && userToSat[k][temp.sat][temp.contact1]==1){
+                    nb_sat++;
 
-            if( i!=0 && aff[temp.site*4+temp.antenna]!=aff_1[temp.site*4+temp.antenna]){
-                handover=1;
-            }
-            for(int k=0; k < its_data.nbUsers; k++){        
-
-                if(people_al[k] != -1 && userToSat[k][temp.sat][temp.s]==1){
-                    if(handover==1){
-                        people[k]+=540;
-                    }else{
-                        people[k]+=600;
+                }
+                if( i!=0  && aff[temp.site*4+temp.antenna]!=-1 && userToSat[k][temp.sat][temp.contact1]==1){
+                    nb_sat++;
+                    if(aff[temp.site*4+temp.antenna]==aff_1[temp.site*4+temp.antenna]){
+                        sat_wout_h++;
                     }
-                    people_al[k]=-1;
-                }           
+                }
+                if(k==0 && i!=0 && (aff[temp.site*4+temp.antenna]!=aff_1[temp.site*4+temp.antenna]|| (aff_1[temp.site*4+temp.antenna]!=-1 && aff[temp.site*4+temp.antenna]==-1))){
+                    nb_h++;
+                }
+
             }
-                        for(int d=0; d < index; d++){
-                aff_1[d]=-1;
-            }
-            aff_1[temp.site*4+temp.antenna]=temp.sat;
-        }
+            
+            if(i==0){
+                if(nb_sat>=1){
+                    nb2+=dureeSlot;
+                    nb+=dureeSlot;
+                }
+            }else{
+                if(nb_sat>=1){
+                    if(sat_wout_h>=1){
+                        nb2+=dureeSlot;
+                        nb+=dureeSlot;
+                    }else{
+                        nb2+=dureeSlot-60;
+                        nb+=dureeSlot-60;
+                    }
+                }
+                
+            } 
         
-        float nv=0;
-
-        for(int i=0; i< its_data.nbUsers; i ++){
-            if(people_al[i]==0 ){
-                nv++;
-            }
         }
 
-        float covering_slot_nb = (((1400*600) - nv*600)*100)/(1400*600);
-        covering_slot[i]=covering_slot_nb;
+        for(int d=0; d < index; d++){
+            aff_1[d]=-1;
+        }
+        for(int j=0; j < taille2; j++){
+            aff_1[plan[i][j].site*4+plan[i][j].antenna]=plan[i][j].sat;
+        }
+
+        float covering_slot_nb=0;
+        if(nb>0){
+            covering_slot_nb = (nb*100)/(1400*dureeSlot);
+        }
+        if(covering_slot_nb<min){
+            min=covering_slot_nb;
+        }
+        if(covering_slot_nb>max){
+            max=covering_slot_nb;
+        }
         file2 << "slot "<< i <<endl;
         file2 << covering_slot_nb<<"%"<<endl;
         file2 << "----------------------------"<<endl;
         
     }
-    float nb=0;
-    for(int i=0; i < taille; i++){
-        nb+=covering_slot[i];
-    }
-    float nb2=0;
-    for(int i=0; i < its_data.nbUsers; i++){
-        nb2+=people[i];
-    }
-    float average_covering_slot=nb/taille;
+
     float covering_nb = (nb2*100)/(1400*its_data.horizon_c);
-    file2<<"average covering slot : "<< average_covering_slot<<"%"<<endl;
     file2 << "covering nb sur la totalité du temps: "<<covering_nb <<"%"<<endl;
+    file2 << "min covering slot : "<<min<<"%"<<endl;
+    file2 << "max covering slot : "<<max<<"%"<<endl;
+    file2<< "nb_h : "<<nb_h<<endl;
 
 }
