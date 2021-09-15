@@ -1,0 +1,7 @@
+please, specify your satellite constellation and horizon
+nb_Antennas 4
+nb_ULS_s 5
+nb_SVs 24
+horizon_c 907200
+time_slot_sp3 300
+satellite_numbers 1 2 3 4 5 7 8 9 11 12 13 14 15 18 19 21 24 25 26 27 30 31 33 36

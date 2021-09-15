@@ -29,6 +29,7 @@ struct defined_data{
     int nbSatellites;
     int nbSites;
     int nbAntennas;
+    float time_slot_sp3;
 };
 
 defined_data get_data ();
@@ -39,6 +40,7 @@ void parse_matrix_u( vector < float>  &contacts,vector< vector < vector <int> > 
 void parse_matrix_s(vector < float> &contacts, vector< vector < vector <int> > > &antennaToSat, defined_data its_data);
 
 void display_3Dmatrix(vector< vector < vector<int> > > &matrice);
+void display_3Dmatrix_f(vector< vector < vector<float> > > &matrice);
 void display_array(vector<float> &matrice);
 
 #endif

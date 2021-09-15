@@ -1,4 +1,4 @@
-#include "solver_sites_h.h"
+#include "solver_sites_60_h.h"
 #include <iostream>
 #include <string>
 
@@ -10,9 +10,9 @@ typedef IloArray<IloNumArray> NumMatrix;
 
 ILOSTLBEGIN
 
-void get_plan_checker_h(list<schedule_ssc> plan){
+void get_plan_checker_60_h(list<schedule_ssc> plan){
     //cout << "coucou" << endl;
-    const char* output_file = "in_out/plan_checker.txt";
+    const char* output_file = "in_out/plan_checker_60_h0.txt";
     ofstream output(output_file, ios::app);
 
     int taille=plan.size();
@@ -32,12 +32,12 @@ void get_plan_checker_h(list<schedule_ssc> plan){
     }
 }
 
-vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2, vector<vector<int> > &g_1, float alpha)
+vector<schedule_ssc> solveMIP_ssc_60_h(vector< vector <float> > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2, vector<vector<int> > &g_1)
 {
     vector<schedule_ssc> ret;
     IloEnv env;
     try {
-       
+        
         IloModel model(env);
         IloCplex cplex(model);
 
@@ -47,24 +47,29 @@ vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_
         NumVarMatrix g(env, its_data.nbSites*its_data.nbAntennas);
 
         IloNumVarArray tau(env, its_data.nbUsers, 0, 2, ILOFLOAT);
+
         for(int i=0; i<its_data.nbUsers; i++){
             t[i]=IloNumArray(env, its_data.nbSatellites, 0, 1, ILOFLOAT);
 
             for(int j=0; j < its_data.nbSatellites; j++){
-                t[i][j]=userToSat[i][j][contact1];
+                if(userToSat[i][j][contact1]==0){
+                    t[i][j]=0;
+                }else{
+                    t[i][j]=1;
+                }
             }
         }
 
         for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
-                g[i]=IloNumVarArray(env, its_data.nbSatellites, 0, 1, ILOINT);
-                
-                for(int j=0; j< its_data.nbSatellites; j++){                
-
-                    if(antennaToSat[i][j][contact1]==0){
-                        model.add(g[i][j]==0);           
-                    }
-                }
+            g[i]=IloNumVarArray(env, its_data.nbSatellites, 0, 1, ILOINT);
             
+            for(int j=0; j< its_data.nbSatellites; j++){                
+
+                if(antennaToSat[i][j][contact1]==0){
+                    model.add(g[i][j]==0);
+                                    
+                }
+            }
         }
 
         if(contact1!=0){
@@ -77,7 +82,6 @@ vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_
                 }
             }
         }
-        
 
         cout << "nbUsers : " << its_data.nbUsers << endl;
         cout << "nbSatellites : " << its_data.nbSatellites << endl;
@@ -139,36 +143,26 @@ vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_
             temp2.end();
 
         }
-            cout << "adding constraints to solver" << endl;
+        cout << "adding constraints to solver" << endl;
 
         if(contact1!=0){  
-            //float alpha =0.99;
-            //float beta=0.01;
-            float beta;
-            if(alpha==0.99){
-                beta=0.01;
-            }
-            if(alpha==1400.0/1800.0){
-                beta=400.0/1800.0;
-            }
-            if(alpha==0.95){
-                beta=0.05;
-            }
+            float alpha =1400.0/1800.0;
+            float beta=400.0/1800.0;
             IloExpr temp4(env);
             for(int i=0; i<its_data.nbSites*its_data.nbAntennas; i++){
 
-                for(int j=0; j< its_data.nbSatellites; j++){                
-                    temp4=temp4+d[i][j];
-                }
-            }      
-            model.add (IloMaximize(env, ((alpha*IloSum(tau)) + (beta*temp4)) ));
-            temp4.end();
+               for(int j=0; j< its_data.nbSatellites; j++){                
+                   temp4=temp4+d[i][j];
+               }
+            } 
+           model.add (IloMaximize(env, (alpha*IloSum(tau)) + (beta*temp4) ));
+           temp4.end();
         }else{
             model.add (IloMaximize(env, IloSum(tau) ));
         }
         cout << "solver ready" << endl;
-        
-        //cplex.exportModel("model.lp");
+       // cplex.exportModel("model.lp");
+
         // Optimize
         //IloCplex cplex(model);
         // time out
@@ -182,7 +176,7 @@ vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_
             cout << "cplex status : " << cplex.getStatus() << endl;
         }
         
-        //env.out() << "Obj : " << cplex.getObjValue() << endl;
+        env.out() << "Obj : " << cplex.getObjValue() << endl;
         list<schedule_ssc> res;
         for (int i=0; i< its_data.nbSites*its_data.nbAntennas; i++){
             
@@ -196,15 +190,15 @@ vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_
                         slot.contact1=contact1;
                         slot.contact11=0;
                         slot.contact111=0;
-                        slot.s=contacts_sites[contact1][0][0];
-                        slot.e=contacts_sites[contact2][0][0];
+                        slot.s=contacts_sites[contact1][0];
+                        slot.e=contacts_sites[contact2][0];
                         res.push_back(slot);
                         ret.push_back(slot);
                 }
             }
         }    
         cout << "MIP end" <<endl;
-        get_plan_checker_h(res);
+        get_plan_checker_60_h(res);
     }
     catch (IloException& ex) {
         cerr << "Error: " << ex << endl;

@@ -1,3 +1,7 @@
+/*
+Checker utilisé avec les contacts de Thalès remplacé ensuite par checker_all
+*/
+
 #ifndef checker_h
 #define checker_h
 

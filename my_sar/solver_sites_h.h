@@ -16,6 +16,6 @@ using namespace std;
 
 ILOSTLBEGIN
 
-vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2, vector <vector<int> > &g_1);
+vector<schedule_ssc> solveMIP_ssc_h(vector< vector < vector<float> > > contacts_sites, vector< vector < vector <float> > > &userToSat, vector< vector < vector <int> > > &antennaToSat, defined_data its_data,int contact1, int contact2, vector <vector<int> > &g_1, float alpha);
 
 #endif

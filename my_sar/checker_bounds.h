@@ -1,3 +1,9 @@
+/*
+fichier pour lancer un checker sur les visibilités utilisateurs-satellite et ainsi dresser une limite supérieure au taux de couverture que l'on peut atteindre
+
+utiliser get_upper_bounds dans le main avec comme argument le nombre de satellites voulu pour la couverture 
+*/
+
 #ifndef checker_bounds_h
 #define checker_bounds_h
 

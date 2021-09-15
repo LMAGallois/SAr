@@ -23,7 +23,23 @@ void display_3Dmatrix(vector< vector < vector<int> > > &matrice){
         for (int j=0; j < matrice[i].size(); j++){
             cout << "satellite n° " << j << endl; 
             
-            for (int k=987; k < 988; k++){
+            for (int k=0; k < 988; k++){
+                cout << matrice[i][j][k] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl << endl;
+    }
+}
+
+void display_3Dmatrix_f(vector< vector < vector<float> > > &matrice){
+    for (int i=0; i < matrice.size(); i++){
+        cout << " utilisateur/antenne n° " << i << endl;
+
+        for (int j=0; j < matrice[i].size(); j++){
+            cout << "satellite n° " << j << endl; 
+            
+            for (int k=0; k < 988; k++){
                 cout << matrice[i][j][k] << " ";
             }
             cout << endl;
@@ -38,6 +54,7 @@ defined_data get_data (){
     int nbSites_in;
     int nbSatellites_in;
     int nbAntennas_in;
+    float time;
 
     const char* cfile_conf = "in_out/config.txt";
     ifstream file(cfile_conf);
@@ -63,6 +80,8 @@ defined_data get_data (){
     file >> nbSatellites_in;
     file >> str_temp;
     file >> nbAntennas_in;
+    file >> str_temp;
+    file >> time;
 
     defined_data its_data;
     its_data.horizon_c=horizon_c_in;
@@ -70,6 +89,7 @@ defined_data get_data (){
     its_data.nbSatellites=nbSatellites_in;
     its_data.nbSites= nbSites_in;
     its_data.nbAntennas= nbAntennas_in;
+    its_data.time_slot_sp3=time;
 
     return its_data;
 }

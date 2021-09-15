@@ -9,7 +9,6 @@
 #include "ilconcert/ilomodel.h"
 #include "parser_sites.h"
 #include "parser.h"
-#include "solver.h"
 
 using namespace std;
 

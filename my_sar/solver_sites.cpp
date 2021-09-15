@@ -12,7 +12,7 @@ ILOSTLBEGIN
 
 void get_plan_checker(list<schedule_ssc> plan){
     //cout << "coucou" << endl;
-    const char* output_file = "in_out/plan_checker_60.txt";
+    const char* output_file = "in_out/plan_checker_1.txt";
     ofstream output(output_file, ios::app);
 
     int taille=plan.size();
