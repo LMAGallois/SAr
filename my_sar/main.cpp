@@ -16,6 +16,10 @@ pour modifier l'interpolation, modifier le fichier parser_instance.cpp
 dans la fonction get_trackSatInterpolate, modifier les "60" avec la valeur voulue (période d'échantillonnage)
 on peut aussi modifier le nombre de points connus qui sera considéré pour l'interpolation lagrangienne (paramètre n de la fonction interpolate() dans le fichier langrange.cpp)
 
+to run the code :
+make clean
+make 
+./sched_Cband
 */
 
 #include <iostream>
